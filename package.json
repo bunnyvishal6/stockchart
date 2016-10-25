@@ -1,0 +1,29 @@
+{
+  "name": "stockchart",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bunnyvishal6/stockchart.git"
+  },
+  "keywords": [
+    "stockchart",
+    "fullstack"
+  ],
+  "author": "bunny vishal",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bunnyvishal6/stockchart/issues"
+  },
+  "homepage": "https://github.com/bunnyvishal6/stockchart#readme",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "mongoose": "^4.6.5",
+    "quandl": "0.0.6"
+  }
+}
