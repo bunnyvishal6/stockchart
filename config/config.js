@@ -1,4 +1,4 @@
 module.exports = {
-    api_key: "_9zjzQ6art6mgcgNPAsQ",
+    api_key: process.env.api_key,
     api_version: 3
 };

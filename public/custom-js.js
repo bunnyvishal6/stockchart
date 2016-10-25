@@ -54,6 +54,7 @@ $(function () {
             },
 
             tooltip: {
+                headerFormat: '<b style="color: white">{point.key}</b><br/>',
                 pointFormat: '<span style="color:{series.color}">{series.name}</span>: <b style="color: white">{point.y}</b> <br/>',
                 valueDecimals: 2,
                 split: false,
