@@ -5,10 +5,14 @@ let express = require('express'),
     mongoose = require('mongoose'),
     path = require('path'),
     Quandl = require('quandl'),
-    config = require('./config/config');
+    config = require('./config/config'),
+    Stock = require('./models/stock');
 
 //mongoose default basic es6 promise
 mongoose.Promise = global.Promise;
+
+//mongoose db connection
+mongoose.connect(config.db);
 
 //Use body-parser to get POST requests for API use
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -24,12 +28,16 @@ let quandl = new Quandl({
 });
 
 //home page
-app.get('/', (req, res)=>{
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 // get stock of a company
-app.get('/:name', (req, res) => {
+app.get('/api/stock/:name', (req, res) => {
+    let start_date = new Date(),
+        end_date = new Date();
+    end_date = end_date.getFullYear() + "-" + (end_date.getMonth() + 1) + "-" + end_date.getDate();
+    start_date = (start_date.getFullYear() -1) + "-" + (start_date.getMonth() + 1) + "-" + start_date.getDate();
     quandl.dataset(
         {
             source: 'WIKI',
@@ -38,15 +46,28 @@ app.get('/:name', (req, res) => {
         {
             order: 'asc',
             exclude_column_names: false,
-            start_date: '2015-10-21',
-            end_date: '2016-10-25',
+            start_date: start_date,
+            end_date: end_date,
             column_index: 1
-        }, 
-        (err, response) => {
+        },
+        (err, data) => {
             if (err) {
                 return res.json(err);
             }
-            res.json(JSON.parse(response));
+            Stock.findOne({ name: req.params.name }, (err, stock) => {
+                if (err) { console.log(err); }
+                if (!stock) {
+                    let newStock = new Stock({ name: req.params.name });
+                    newStock.save(err => {
+                        if (err) {
+                            console.log(err);
+                        }
+                        res.json(JSON.parse(data));
+                    });
+                } else {
+                    res.json(JSON.parse(data));
+                }
+            });
         }
     );
 });

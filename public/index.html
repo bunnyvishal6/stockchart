@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" ng-app="stockchart">
 
 <head>
 	<meta charset="utf-8" />
@@ -19,9 +19,17 @@
 <body>
 	<div class="container">
 		<h1 class="text-center" id="main-title">Stockchart</h1>
-		<div class="row">
-			<div id="chart"></div>
+
+		<div ng-controller="HomeCtrl" ng-cloak>
+
+			<div class="row">
+				<div id="chart"></div>
+			</div>
+
+			<div ng-include="'/public/templates/stock-catalog.html'"></div>
+
 		</div>
+
 	</div>
 
 	<footer class="text-center" id="foot">
@@ -38,14 +46,15 @@
 	<!-- Latest compiled and minified JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
 		crossorigin="anonymous"></script>
-	<!-- Angular js
+	<!-- Angular js -->
 	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
-	-->
 	<!-- Angular ngRoute js
 	<script src="https://code.angularjs.org/1.5.8/angular-route.min.js"></script>
     -->
 	<!-- Highcharts js -->
 	<script src="https://code.highcharts.com/stock/highstock.js"></script>
+	<!-- Highcharts options -->
+	<script src="/public/chart.js"></script>
 	<!-- Custom-js js -->
 	<script src="/public/custom-js.js"></script>
 </body>
