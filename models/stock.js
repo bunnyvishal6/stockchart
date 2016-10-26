@@ -2,7 +2,7 @@ const mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 const StockSchema = new Schema({
-    name: {
+    code: {
         type: String,
         unique: true
     }

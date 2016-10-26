@@ -1,8 +1,8 @@
 <div ng-show="showCatalog" class="row" id="stocks-catalog">
-	<div ng-repeat="stock in stocksCatalog" class="col col-md-3 col-sm-4">
+	<div ng-repeat="stock in stocksCatalog track by $index" class="col col-md-3 col-sm-4">
 		<div class="stock-catalog" style="border: 2px solid {{stock.color}}">
 			<h3 class="stock-code" style="color: {{stock.color}}">{{stock.code}}</h3>
-			<button ng-click="removeStock(stock.code, stock.color)" type="button" class="btn btn-xs btn-danger remove-stock-btn"><i class="fa fa-times" aria-hidden="true"></i></button>
+			<button ng-click="removeStock(stock)" type="button" class="btn btn-xs btn-danger remove-stock-btn"><i class="fa fa-times" aria-hidden="true"></i></button>
 			<p class="stock-name">{{stock.name}}</p>
 		</div>
 	</div>
