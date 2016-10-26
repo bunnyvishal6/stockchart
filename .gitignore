@@ -49,3 +49,5 @@ node_modules
 
 #config-2.jscoverage
 config-2.js
+
+custom-js2.js
