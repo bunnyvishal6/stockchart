@@ -10,23 +10,32 @@ let express = require('express'),
     config = require('./config/config'),
     Stock = require('./models/stock');
 
+//mongoose default basic es6 promise
 mongoose.Promise = global.Promise;
 
+//mongoose db connection
 mongoose.connect(config.db);
 
+//Use body-parser to get POST requests for API use
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+//static folder serve
 app.use(express.static(path.join(__dirname, 'public')));
 
+//static files serve 
 app.use("/public", express.static(path.join(__dirname, 'public')));
 
+//quandl init
 let quandl = new Quandl({
     auth_token: config.api_key,
     api_version: config.api_version
 });
 
+//on connection emit the intistocks
 io.on('connection', socket => {
+    console.log('new connection made');
+    //get all stocks and emit initstocks
     Stock.find({}, (err, stocks) => {
         if (err) { console.log(err); }
         if (stocks.length === 0) {
@@ -42,6 +51,7 @@ io.on('connection', socket => {
         }
     });
 
+    //on deletestock delete the stock from database and emit the stock to client so that deletion done in client as well
     socket.on('deletestock', data => {
         Stock.findOne({ code: data.stock.code }, (err, stock) => {
             if (err) { console.log(err) }
@@ -55,6 +65,7 @@ io.on('connection', socket => {
         })
     });
 
+    //on addstock add the stock code to database and emit the stock code to client so that the addition is done in client as well.
     socket.on('addstock', emitedData => {
         let code = emitedData.code,
             start_date = new Date(),
@@ -75,13 +86,16 @@ io.on('connection', socket => {
             },
             (err, data) => {
                 if (err) {
+                    //emit addedstock error to particular client
                     return socket.emit('addedstock', { err: err });
                 }
+                //if there is no quandl error then try to save the stock 
                 if (!JSON.parse(data).quandl_error) {
                     Stock.find({}, (err, stocks) => {
                         if (err) { 
                             console.log(err) 
                         }
+                        //check if the stocks length is 10 then emit to particular socket that limit exceed. else continue
                         if (stocks.length === 10) {
                             socket.emit('limitexceeded', { msg: "you cannot compare more than 10 stocks at a time." });
                         } else {
@@ -89,20 +103,23 @@ io.on('connection', socket => {
                             for (let i = 0; i < stocks.length; i++) {
                                 if (stocks[i].code == code) {
                                     stockExists = true;
+                                    //emitting addedstock for all clients
                                     io.emit('addedstock', { data: JSON.parse(data), code: code });
                                 } else if (!stockExists && i == (stocks.length - 1)) {
                                     let newStock = new Stock({ code: code });
+                                    //attempt to save newstock
                                     newStock.save(err => {
                                         if (err) {
                                             console.log(err);
                                         }
+                                        //emitting addedstock for all clients
                                         io.emit('addedstock', { data: JSON.parse(data), code: code });
                                     });
                                 }
                             }
                         }
                     });
-                } else { 
+                } else { // if quandl_error presents then emit the addedstock to particular client without attempting to save stock name.
                     socket.emit('addedstock', { data: JSON.parse(data), code: code });
                 }
             }
@@ -112,6 +129,8 @@ io.on('connection', socket => {
 
 });
 
+
+//delete a stock
 app.post('/api/deletestock', (req, res) => {
     Stock.findOne({ code: req.body.stock.code }, (err, stock) => {
         if (stock) {
@@ -124,12 +143,28 @@ app.post('/api/deletestock', (req, res) => {
     });
 });
 
-
+//home page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
+//get initstocks
+app.get('/initstocks', (req, res) => {
+    Stock.find({}, (err, stocks) => {
+        if (err) {
+            return res.json(err);
+        }
+        if (stocks) {
+            var array = [];
+            stocks.forEach((stock) => {
+                array.push(stock.code);
+            });
+            res.json(array);
+        }
+    });
+});
 
+// get stock of a company
 app.get('/api/stock/:code', (req, res) => {
     let start_date = new Date(),
         end_date = new Date();
@@ -151,7 +186,7 @@ app.get('/api/stock/:code', (req, res) => {
             if (err) {
                 return res.json(err);
             }
-            
+            //if there is no quandl error then try to save the stock 
             if (!JSON.parse(data).quandl_error) {
                 Stock.findOne({ code: req.params.code }, (err, stock) => {
                     if (err) { console.log(err); }
@@ -167,7 +202,7 @@ app.get('/api/stock/:code', (req, res) => {
                         res.json(JSON.parse(data));
                     }
                 });
-            } else { 
+            } else { // if quandl_error presents then server data without attempting to save stock name.
                 res.json(JSON.parse(data));
             }
         }

@@ -1,3 +1,7 @@
+/**
+         * Create the chart when all data is loaded
+         * @returns {undefined}
+         */
 function createChart(seriesOptions) {
     $('#chart').highcharts('StockChart', {
         rangeSelector: {
