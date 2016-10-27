@@ -24,6 +24,7 @@
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "mongoose": "^4.6.5",
-    "quandl": "0.0.6"
+    "quandl": "0.0.6",
+    "socket.io": "^1.5.1"
   }
 }
