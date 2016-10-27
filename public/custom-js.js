@@ -7,13 +7,13 @@ angular.module('stockchart', [])
         $scope.stocksCatalog = [];
         var socket = io.connect();
 
-         $scope.showError = function () {
+        $scope.showError = function () {
             $(".custom-modal").addClass("make-background-dim");
             $("#myModal").css("display", "block");
             $("#myModal").removeClass('throw-up-modal');
         };
 
-         $scope.hideError = function () {
+        $scope.hideError = function () {
             $(".custom-modal").removeClass("make-background-dim");
             $("#myModal").removeClass('drop-in-modal');
             $("#myModal").addClass('throw-up-modal');
@@ -25,16 +25,19 @@ angular.module('stockchart', [])
 
         socket.on('initstocks', function (data) {
             var initStocks = data.stocks;
-            if (initStocks.length === 0) { 
-                console.log("no initstocks");
-                $scope.showCatalog = true;
+            if (initStocks.length === 0) {
+                $scope.errorMsg = "No stock added yet. please add one.";
+                $scope.showError();
+                $scope.$apply(function () {
+                    $scope.showCatalog = true;
+                });
                 createChart();
             } else {
                 stocks = initStocks;
                 angular.forEach(stocks, function (name, i) {
                     $http.get('http://localhost:3000/api/stock/' + name)
                         .success(function (data) {
-                            if (data.dataset) { 
+                            if (data.dataset) {
                                 $scope.stocksCatalog[stocks.indexOf(name)] = {
                                     code: name,
                                     name: data.dataset.name,
@@ -49,7 +52,7 @@ angular.module('stockchart', [])
                                     data: data
                                 };
                                 seriesCounter += 1;
-                            } else { 
+                            } else {
                                 stocks.splice(i, 1);
                                 console.log(data);
                             }
@@ -58,7 +61,7 @@ angular.module('stockchart', [])
                                 createChart(seriesOptions);
                             }
                         })
-                        .error(function (err) { 
+                        .error(function (err) {
                             stocks.splice(i, 1);
                             if (seriesCounter === stocks.length) {
                                 $scope.showCatalog = true;
@@ -97,11 +100,11 @@ angular.module('stockchart', [])
                 $scope.errorMsg = 'Sorry! you cannot compare more than 10 stocks at a time.';
                 $scope.showError();
             } else {
-                if (stocks.indexOf(name) < 0) { 
+                if (stocks.indexOf(name) < 0) {
                     $("#addStockDiv").css('display', 'none');
                     $("#refreshIcon").css('display', 'inline-block');
                     socket.emit('addstock', { code: name });
-                } else { 
+                } else {
                     $scope.errorMsg = 'This stock has been displaying in chart.';
                     $scope.showError();
                 }
@@ -138,8 +141,8 @@ angular.module('stockchart', [])
                 stocks.push(name);
                 $("#refreshIcon").css('display', 'none');
                 $("#addStockDiv").css('display', 'inline-block');
-            } else { 
-                $scope.$apply(function(){
+            } else {
+                $scope.$apply(function () {
                     $scope.errorMsg = 'Please enter a valid stock code';
                 });
                 $scope.showError();

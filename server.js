@@ -79,30 +79,40 @@ io.on('connection', socket => {
                 }
                 if (!JSON.parse(data).quandl_error) {
                     Stock.find({}, (err, stocks) => {
-                        if (err) { 
-                            console.log(err) 
+                        if (err) {
+                            console.log(err)
                         }
                         if (stocks.length === 10) {
                             socket.emit('limitexceeded', { msg: "you cannot compare more than 10 stocks at a time." });
                         } else {
-                            let stockExists = false;
-                            for (let i = 0; i < stocks.length; i++) {
-                                if (stocks[i].code == code) {
-                                    stockExists = true;
+                            if (stocks.length === 0) {
+                                let newStock = new Stock({ code: code });
+                                newStock.save(err => {
+                                    if (err) {
+                                        console.log(err);
+                                    }
                                     io.emit('addedstock', { data: JSON.parse(data), code: code });
-                                } else if (!stockExists && i == (stocks.length - 1)) {
-                                    let newStock = new Stock({ code: code });
-                                    newStock.save(err => {
-                                        if (err) {
-                                            console.log(err);
-                                        }
+                                });
+                            } else {
+                                let stockExists = false;
+                                for (let i = 0; i < stocks.length; i++) {
+                                    if (stocks[i].code == code) {
+                                        stockExists = true;
                                         io.emit('addedstock', { data: JSON.parse(data), code: code });
-                                    });
+                                    } else if (!stockExists && i == (stocks.length - 1)) {
+                                        let newStock = new Stock({ code: code });
+                                        newStock.save(err => {
+                                            if (err) {
+                                                console.log(err);
+                                            }
+                                            io.emit('addedstock', { data: JSON.parse(data), code: code });
+                                        });
+                                    }
                                 }
                             }
                         }
                     });
-                } else { 
+                } else {
                     socket.emit('addedstock', { data: JSON.parse(data), code: code });
                 }
             }
@@ -151,7 +161,7 @@ app.get('/api/stock/:code', (req, res) => {
             if (err) {
                 return res.json(err);
             }
-            
+
             if (!JSON.parse(data).quandl_error) {
                 Stock.findOne({ code: req.params.code }, (err, stock) => {
                     if (err) { console.log(err); }
@@ -167,7 +177,7 @@ app.get('/api/stock/:code', (req, res) => {
                         res.json(JSON.parse(data));
                     }
                 });
-            } else { 
+            } else {
                 res.json(JSON.parse(data));
             }
         }

@@ -28,8 +28,11 @@ angular.module('stockchart', [])
             //make initstocks equal to data.stocks
             var initStocks = data.stocks;
             if (initStocks.length === 0) { //if initStocks length is empty then createchart and showCatalog
-                console.log("no initstocks");
-                $scope.showCatalog = true;
+                $scope.errorMsg = "No stock added yet. please add one.";
+                $scope.showError();
+                $scope.$apply(function () {
+                    $scope.showCatalog = true;
+                });
                 createChart();
             } else {
                 stocks = initStocks;

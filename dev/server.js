@@ -92,29 +92,39 @@ io.on('connection', socket => {
                 //if there is no quandl error then try to save the stock 
                 if (!JSON.parse(data).quandl_error) {
                     Stock.find({}, (err, stocks) => {
-                        if (err) { 
-                            console.log(err) 
+                        if (err) {
+                            console.log(err)
                         }
                         //check if the stocks length is 10 then emit to particular socket that limit exceed. else continue
                         if (stocks.length === 10) {
                             socket.emit('limitexceeded', { msg: "you cannot compare more than 10 stocks at a time." });
                         } else {
-                            let stockExists = false;
-                            for (let i = 0; i < stocks.length; i++) {
-                                if (stocks[i].code == code) {
-                                    stockExists = true;
-                                    //emitting addedstock for all clients
+                            if (stocks.length === 0) { //check if stocks length 0 , if so serve the stock by saving it.
+                                let newStock = new Stock({ code: code });
+                                newStock.save(err => {
+                                    if (err) {
+                                        console.log(err);
+                                    }
                                     io.emit('addedstock', { data: JSON.parse(data), code: code });
-                                } else if (!stockExists && i == (stocks.length - 1)) {
-                                    let newStock = new Stock({ code: code });
-                                    //attempt to save newstock
-                                    newStock.save(err => {
-                                        if (err) {
-                                            console.log(err);
-                                        }
+                                });
+                            } else { //if stocks length is more then
+                                let stockExists = false;
+                                for (let i = 0; i < stocks.length; i++) {
+                                    if (stocks[i].code == code) {
+                                        stockExists = true;
                                         //emitting addedstock for all clients
                                         io.emit('addedstock', { data: JSON.parse(data), code: code });
-                                    });
+                                    } else if (!stockExists && i == (stocks.length - 1)) {
+                                        let newStock = new Stock({ code: code });
+                                        //attempt to save newstock
+                                        newStock.save(err => {
+                                            if (err) {
+                                                console.log(err);
+                                            }
+                                            //emitting addedstock for all clients
+                                            io.emit('addedstock', { data: JSON.parse(data), code: code });
+                                        });
+                                    }
                                 }
                             }
                         }
