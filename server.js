@@ -176,4 +176,4 @@ app.get('/api/stock/:code', (req, res) => {
 
 
 
-server.listen(config.PORT || 3000);
+server.listen(process.env.PORT || 3000);
