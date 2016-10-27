@@ -35,7 +35,7 @@ angular.module('stockchart', [])
             } else {
                 stocks = initStocks;
                 angular.forEach(stocks, function (name, i) {
-                    $http.get('http://localhost:3000/api/stock/' + name)
+                    $http.get('https://bunny-stockchart.herokuapp.com/api/stock/' + name)
                         .success(function (data) {
                             if (data.dataset) {
                                 $scope.stocksCatalog[stocks.indexOf(name)] = {
